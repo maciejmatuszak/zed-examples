@@ -44,9 +44,9 @@ enum APP_TYPE {
 
 int main(int argc, char **argv) {
  
-    if (argc != 4 ) {
+    if (argc != 5 ) {
         cout << "Usage: \n\n";
-        cout << "    ZED_SVO_Export A B C \n\n";
+        cout << "    ZED_SVO_Export A B C D\n\n";
         cout << "Please use the following parameters from the command line:\n";
         cout << " A - SVO file path (input) : \"path/to/file.svo\"\n";
         cout << " B - AVI file path (output) or image sequence folder(output) : \"path/to/output/file.avi\" or \"path/to/output/folder\"\n";
@@ -55,6 +55,7 @@ int main(int argc, char **argv) {
         cout << "                   2=Export LEFT+RIGHT image sequence.\n";
         cout << "                   3=Export LEFT+DEPTH_VIEW image sequence.\n";
         cout << "                   4=Export LEFT+DEPTH_16Bit image sequence.\n";
+        cout << " D - export every n'th frame\n";
         cout << " A and B need to end with '/' or '\\'\n\n";
         cout << "Examples: \n";
         cout << "  (AVI LEFT+RIGHT)   ZED_SVO_Export \"path/to/file.svo\" \"path/to/output/file.avi\" 0\n";
@@ -70,6 +71,9 @@ int main(int argc, char **argv) {
     // Get input parameters
     string svo_input_path(argv[1]);
     string output_path(argv[2]);
+
+    int nth_image = atoi(argv[4]);
+
     bool output_as_video = true;
     APP_TYPE app_type = LEFT_AND_RIGHT;
     if (!strcmp(argv[3],"1") || !strcmp(argv[3], "3"))
@@ -147,13 +151,23 @@ int main(int argc, char **argv) {
     cout << "Converting SVO... Use Ctrl-C to interrupt conversion." << endl;
 
     int nb_frames = zed.getSVONumberOfFrames();
-    int svo_position = 0;
 
+    int svo_position = 0;
+    cout << "SVO has " << nb_frames << " frames;" << endl;
     SetCtrlHandler();
 
     while (!exit_app) {
         if (zed.grab(rt_param) == SUCCESS) {
             svo_position = zed.getSVOPosition();
+
+            if(svo_position % nth_image != 0)
+            {
+                if (svo_position >= (nb_frames - 1)) { // End of SVO
+                    cout << "\nSVO end has been reached. Exiting now.\n";
+                    exit_app = true;
+                }
+                continue;
+            }
 
             // Retrieve SVO images
             zed.retrieveImage(left_image, VIEW_LEFT);

@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
         cout << "    ZED_SVO_Export A B C D\n\n";
         cout << "Please use the following parameters from the command line:\n";
         cout << " A - SVO file path (input) : \"path/to/file.svo\"\n";
-        cout << " B - AVI file path (output) or image sequence folder(output) : \"path/to/output/file.avi\" or \"path/to/output/folder\"\n";
+        cout << " B - AVI of dir path (output) or image sequence folder(output) : \"path/to/output/file.avi\" or \"path/to/output/folder\"\n";
         cout << " C - Export mode:  0=Export LEFT+RIGHT AVI.\n";
         cout << "                   1=Export LEFT+DEPTH_VIEW AVI.\n";
         cout << "                   2=Export LEFT+RIGHT image sequence.\n";

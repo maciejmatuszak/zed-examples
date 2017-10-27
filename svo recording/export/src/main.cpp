@@ -31,6 +31,7 @@
 #include <sstream>
 #include <opencv2/opencv.hpp>
 #include "utils.hpp"
+#include "boost/filesystem.hpp"
 
 // Using namespace
 using namespace sl;
@@ -70,7 +71,11 @@ int main(int argc, char **argv) {
 
     // Get input parameters
     string svo_input_path(argv[1]);
+    boost::filesystem::path svo_input_filename(svo_input_path);
+    svo_input_filename = svo_input_filename.filename();
+
     string output_path(argv[2]);
+    boost::filesystem::path output_path_boost(output_path);
 
     int nth_image = atoi(argv[4]);
 
@@ -174,7 +179,7 @@ int main(int argc, char **argv) {
 
             switch (app_type) {
             case LEFT_AND_RIGHT:
-                zed.retrieveImage(right_image, VIEW_RIGHT);
+//                zed.retrieveImage(right_image, VIEW_RIGHT);
                 break;
             case  LEFT_AND_DEPTH:
                 zed.retrieveImage(right_image, VIEW_DEPTH);
@@ -201,23 +206,32 @@ int main(int argc, char **argv) {
             }
             else {
                 // Generate filenames
-                ostringstream filename1;
-                filename1 << output_path << "/left" << setfill('0') << setw(6) << svo_position << ".png";
-                ostringstream filename2;
-                filename2 << output_path << (app_type==LEFT_AND_RIGHT?"/right":"/depth") << setfill('0') << setw(6) << svo_position << ".png";
-                
-                // Save Left images
-                cv::imwrite(filename1.str(), left_image_ocv);
 
-                // Save depth
-                if(app_type != LEFT_AND_DEPTH_16)
-                    cv::imwrite(filename2.str(), right_image_ocv);
-                else {
-                    // Convert to 16Bit
-                    cv::Mat depth16;
-                    depth_image_ocv.convertTo(depth16, CV_16UC1);
-                    cv::imwrite(filename2.str(), depth16);
+                ostringstream filename1, filename2;
+                filename1 << svo_input_filename.string() << "_left" << setfill('0') << setw(6) << svo_position << ".png";
+                if(app_type == LEFT_AND_DEPTH_16 || app_type != LEFT_AND_DEPTH)
+                {
+                    filename2 << svo_input_filename.string() << "_depth" << setfill('0') << setw(6) << svo_position << ".png";
                 }
+                else
+                {
+                    filename2 << svo_input_filename.string() << "_right" << setfill('0') << setw(6) << svo_position << ".png";
+                }
+                boost::filesystem::path f1 = output_path_boost / filename1.str();
+                boost::filesystem::path f2 = output_path_boost / filename2.str();
+
+                // Save Left images
+                cv::imwrite(f1.string(), left_image_ocv);
+
+//                // Save depth
+//                if(app_type != LEFT_AND_DEPTH_16)
+//                    cv::imwrite(f2.string(), right_image_ocv);
+//                else {
+//                    // Convert to 16Bit
+//                    cv::Mat depth16;
+//                    depth_image_ocv.convertTo(depth16, CV_16UC1);
+//                    cv::imwrite(f2.string(), depth16);
+//                }
             }
 
             // Display progress

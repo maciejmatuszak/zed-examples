@@ -39,9 +39,11 @@ ELSE() # Linux
     SET(SPECIAL_OS_LIBS "pthread" "X11")
 ENDIF(WIN32)
 
+find_package(Boost REQUIRED COMPONENTS filesystem)
 find_package(OpenCV ${VERSION_REQ_OCV} REQUIRED)
 find_package(CUDA ${VERSION_REQ_CUDA} REQUIRED)
  
+include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${CUDA_INCLUDE_DIRS})
 include_directories(${ZED_INCLUDE_DIRS})
 include_directories(${OpenCV_INCLUDE_DIRS})
@@ -56,6 +58,7 @@ add_definitions(-std=c++0x -g -O3)
 
 # Add the required libraries for linking:
 TARGET_LINK_LIBRARIES(${execName}
+                        ${Boost_LIBRARIES}
                         ${ZED_LIBRARIES}
                         ${SPECIAL_OS_LIBS}
                         ${OpenCV_LIBS}
